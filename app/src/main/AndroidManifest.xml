@@ -21,6 +21,13 @@
         android:theme="@style/Theme.PersonalProject"
         tools:targetApi="23">
         <activity
+            android:name=".ActivityChat"
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".ActivityAddFriend"
+            android:exported="false" />
+        <activity
             android:name=".ActivityRegister"
             android:exported="false" />
         <activity

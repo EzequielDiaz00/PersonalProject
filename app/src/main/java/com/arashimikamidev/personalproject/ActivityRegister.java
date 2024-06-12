@@ -12,33 +12,37 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ActivityRegister extends AppCompatActivity {
 
     EditText txtUserName, txtEmail, txtPassword, txtPassConfirm;
     Button btnRegister, btnLogin;
+    DatabaseReference mDatabaseRef;
     FirebaseAuth mAuth;
-    FirebaseFirestore dbFirebase;
-    GoogleSignInOptions gso;
-    GoogleSignInClient gsc;
+    FirebaseFirestore dbFirestore;
 
     @Override
     public void onStart() {
         super.onStart();
+        mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            Intent intent = new Intent(getApplicationContext(), ActivityMain.class);
-            startActivity(intent);
-            finish();
+            navigateToMainActivity();
         }
     }
 
@@ -49,101 +53,123 @@ public class ActivityRegister extends AppCompatActivity {
 
         loadObjects();
 
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), ActivityLogin.class);
-                startActivity(intent);
-            }
-        });
+        btnLogin.setOnClickListener(v -> navigateToLoginActivity());
 
-        btnRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String user = txtUserName.getText().toString();
-                String email = txtEmail.getText().toString();
-                String password = txtPassword.getText().toString();
-                String passConfirm = txtPassConfirm.getText().toString();
+        btnRegister.setOnClickListener(v -> {
+            String user = txtUserName.getText().toString();
+            String email = txtEmail.getText().toString();
+            String password = txtPassword.getText().toString();
+            String passConfirm = txtPassConfirm.getText().toString();
 
-                if (user.isEmpty()) {
-                    Toast.makeText(ActivityRegister.this, "Ingrese nombre de usuario", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (email.isEmpty()) {
-                    Toast.makeText(ActivityRegister.this, "Ingrese el correo electronico", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (password.isEmpty()) {
-                    Toast.makeText(ActivityRegister.this, "Ingrese la contraseña", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (passConfirm.isEmpty()) {
-                    Toast.makeText(ActivityRegister.this, "Confirme la contraseña", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                if (password.equals(passConfirm)) {
-                    SignUpEmail(email, password, user);
-                }
+            if (validateInputs(user, email, password, passConfirm)) {
+                signUpEmail(email, password, user);
             }
         });
     }
 
     private void loadObjects() {
+        txtUserName = findViewById(R.id.txtName);
         txtEmail = findViewById(R.id.txtEmail);
         txtPassword = findViewById(R.id.txtPassword);
         txtPassConfirm = findViewById(R.id.txtConfirm);
-        txtUserName = findViewById(R.id.txtName);
-
         btnLogin = findViewById(R.id.btnLogin);
         btnRegister = findViewById(R.id.btnRegister);
-
         mAuth = FirebaseAuth.getInstance();
+        dbFirestore = FirebaseFirestore.getInstance();
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
     }
 
-    private void SignUpEmail(String email, String password, String userName) {
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d("ActivityRegister", "createUserWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
+    private boolean validateInputs(String user, String email, String password, String passConfirm) {
+        if (user.isEmpty()) {
+            Toast.makeText(ActivityRegister.this, "Ingrese nombre de usuario", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (email.isEmpty()) {
+            Toast.makeText(ActivityRegister.this, "Ingrese el correo electronico", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (password.isEmpty()) {
+            Toast.makeText(ActivityRegister.this, "Ingrese la contraseña", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (passConfirm.isEmpty()) {
+            Toast.makeText(ActivityRegister.this, "Confirme la contraseña", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (!password.equals(passConfirm)) {
+            Toast.makeText(ActivityRegister.this, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
 
-                            updateUserEmail(userName);
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w("ActivityRegister", "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(ActivityRegister.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+    private void signUpEmail(String email, String password, String userName) {
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        Log.d("ActivityRegister", "createUserWithEmail:success");
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            updateUserProfile(user, userName);
                         }
+                    } else {
+                        Log.w("ActivityRegister", "createUserWithEmail:failure", task.getException());
+                        Toast.makeText(ActivityRegister.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
-    private void updateUserEmail(String userName) {
-        FirebaseUser user = mAuth.getCurrentUser();
-
+    private void updateUserProfile(FirebaseUser user, String userName) {
         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                 .setDisplayName(userName)
                 .setPhotoUri(Uri.parse("null"))
                 .build();
 
         user.updateProfile(profileUpdates)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            Log.d("ActivityRegister", "User profile updated.");
-
-                            Intent intent = new Intent(getApplicationContext(), ActivityMain.class);
-                            startActivity(intent);
-                            finish();
-                        } else {
-                            Log.d("ActivityRegister", "Error al actualizar");
-                        }
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.d("ActivityRegister", "User profile updated.");
+                        insertDataToFirestore(user.getUid(), user.getDisplayName(), user.getEmail());
+                        navigateToMainActivity();
+                    } else {
+                        Log.d("ActivityRegister", "Error al actualizar perfil", task.getException());
                     }
                 });
+    }
+
+    private void insertDataToFirestore(String uid, String name, String email) {
+        Map<String, Object> user = new HashMap<>();
+        user.put("uid", uid);
+        user.put("name", name);
+        user.put("email", email);
+        user.put("type", "Email");
+
+        dbFirestore.collection("users").document(uid)
+                .set(user)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void avoid) {
+                        mDatabaseRef.child("users").child(uid).child("chat").setValue("Chat");
+
+                        Log.d("ActivityRegister", "DocumentSnapshot added with ID: " + avoid);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("ActivityRegister", "Error adding document", e);
+                    }
+                });
+    }
+
+    private void navigateToMainActivity() {
+        Intent intent = new Intent(getApplicationContext(), ActivityMain.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private void navigateToLoginActivity() {
+        Intent intent = new Intent(getApplicationContext(), ActivityLogin.class);
+        startActivity(intent);
     }
 }

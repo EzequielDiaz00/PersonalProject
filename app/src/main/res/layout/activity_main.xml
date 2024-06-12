@@ -65,4 +65,17 @@
         android:layout_below="@id/txtSearch"
         android:layout_margin="8dp" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddFriend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:clickable="true"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/ic_miapp_add_item1" />
 </RelativeLayout>
