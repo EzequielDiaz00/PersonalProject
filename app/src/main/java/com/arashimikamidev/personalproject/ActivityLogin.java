@@ -31,6 +31,7 @@ public class ActivityLogin extends AppCompatActivity {
 
     private EditText txtEmail, txtPassword;
     private Button btnLogin, btnRegister, btnGoogle;
+    private ClassVeryNet classVeryNet;
     private DatabaseReference mDatabaseRef;
     private FirebaseAuth mAuth;
     private FirebaseFirestore dbFirestore;
@@ -38,6 +39,7 @@ public class ActivityLogin extends AppCompatActivity {
     private GoogleSignInClient gsc;
 
     private static final int REQ_GOOGLE_SIGN_IN = 2;
+    private static boolean veryNet;
 
     @Override
     public void onStart() {
@@ -53,6 +55,13 @@ public class ActivityLogin extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        classVeryNet = new ClassVeryNet();
+        veryNet = classVeryNet.isNetworkAvailable(this);
+
+        if (veryNet == false) {
+            Toast.makeText(ActivityLogin.this, "No hay conexion a internet. Conectese a una red", Toast.LENGTH_SHORT).show();
+        }
 
         loadObjects();
 
@@ -94,6 +103,13 @@ public class ActivityLogin extends AppCompatActivity {
     }
 
     private void signInEmail(String email, String password) {
+        veryNet = classVeryNet.isNetworkAvailable(this);
+
+        if (veryNet == false) {
+            Toast.makeText(ActivityLogin.this, "No se puede iniciar sesion porque no hay conexion a internet.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
@@ -115,6 +131,13 @@ public class ActivityLogin extends AppCompatActivity {
     }
 
     private void signInWithGoogle() {
+        veryNet = classVeryNet.isNetworkAvailable(this);
+
+        if (veryNet == false) {
+            Toast.makeText(ActivityLogin.this, "No se puede iniciar sesion porque no hay conexion a internet.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Intent signInIntent = gsc.getSignInIntent();
         startActivityForResult(signInIntent, REQ_GOOGLE_SIGN_IN);
     }

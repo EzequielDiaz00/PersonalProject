@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -12,6 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -36,16 +39,21 @@ public class ActivityMain extends AppCompatActivity {
     private TextView lblNameUser;
     private ImageView imgUser, btnSettings;
     private ListView ltsUser;
+    private ClassVeryNet classVeryNet;
     private AdapterFriends adapterFriends;
-    private FloatingActionButton fabAddFriend;
     private FirebaseAuth mAuth;
     private FirebaseFirestore dbFirestore;
     private GoogleSignInClient googleSignInClient;
+    private static boolean veryNet;
+    private List<ClassFriends> friendsList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        classVeryNet = new ClassVeryNet();
+        veryNet = classVeryNet.isNetworkAvailable(this);
 
         initializeUIComponents();
         loadUserDetails();
@@ -53,16 +61,34 @@ public class ActivityMain extends AppCompatActivity {
 
         btnSettings.setOnClickListener(v -> signOut());
 
-        fabAddFriend.setOnClickListener(v -> {
-            Intent intent = new Intent(getApplicationContext(), ActivityAddFriend.class);
-            startActivity(intent);
-        });
-
         ltsUser.setOnItemClickListener((parent, view, position, id) -> {
+
+            veryNet = classVeryNet.isNetworkAvailable(this);
+
+            if (!veryNet) {
+                Toast.makeText(ActivityMain.this, "No se puede abrir el chat, porque no hay conexion a internet", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             ClassFriends friend = adapterFriends.getItem(position);
             Intent intent = new Intent(getApplicationContext(), ActivityChat.class);
             intent.putExtra("friend", friend);
             startActivity(intent);
+        });
+
+        txtSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filtreFriends();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
         });
     }
 
@@ -72,7 +98,6 @@ public class ActivityMain extends AppCompatActivity {
         imgUser = findViewById(R.id.imgUser);
         btnSettings = findViewById(R.id.btnSettings);
         ltsUser = findViewById(R.id.listUser);
-        fabAddFriend = findViewById(R.id.fabAddFriend);
 
         mAuth = FirebaseAuth.getInstance();
         dbFirestore = FirebaseFirestore.getInstance();
@@ -84,7 +109,28 @@ public class ActivityMain extends AppCompatActivity {
         googleSignInClient = GoogleSignIn.getClient(this, googleSignInOptions);
     }
 
+    private void filtreFriends() {
+        String searchText = txtSearch.getText().toString().toLowerCase();
+        List<ClassFriends> filteredList = new ArrayList<>();
+
+        for (ClassFriends friend : friendsList) {
+            if (friend.getUserName().toLowerCase().contains(searchText) ||
+                    friend.getUserEmail().toLowerCase().contains(searchText)) {
+                filteredList.add(friend);
+            }
+        }
+
+        adapterFriends.updateList(filteredList);
+    }
+
     private void loadUserDetails() {
+        veryNet = classVeryNet.isNetworkAvailable(this);
+
+        if (!veryNet) {
+            Toast.makeText(ActivityMain.this, "No se pueden mostrar los datos porque no hay conexion a internet", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
             lblNameUser.setText(user.getDisplayName());
@@ -95,11 +141,18 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void loadFriendsList() {
+        veryNet = classVeryNet.isNetworkAvailable(this);
+
+        if (!veryNet) {
+            Toast.makeText(ActivityMain.this, "No se pueden mostrar los datos porque no hay conexion a internet", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         dbFirestore.collection("users")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        List<ClassFriends> friendsList = new ArrayList<>();
+                        friendsList = new ArrayList<>();
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             String userName = document.getString("name");
                             String userEmail = document.getString("email");

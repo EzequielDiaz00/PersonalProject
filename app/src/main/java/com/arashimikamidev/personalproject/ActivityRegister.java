@@ -32,9 +32,12 @@ public class ActivityRegister extends AppCompatActivity {
 
     EditText txtUserName, txtEmail, txtPassword, txtPassConfirm;
     Button btnRegister, btnLogin;
+    ClassVeryNet classVeryNet;
     DatabaseReference mDatabaseRef;
     FirebaseAuth mAuth;
     FirebaseFirestore dbFirestore;
+
+    private static boolean veryNet;
 
     @Override
     public void onStart() {
@@ -50,6 +53,9 @@ public class ActivityRegister extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
+        classVeryNet = new ClassVeryNet();
+        veryNet = classVeryNet.isNetworkAvailable(this);
 
         loadObjects();
 
@@ -104,6 +110,13 @@ public class ActivityRegister extends AppCompatActivity {
     }
 
     private void signUpEmail(String email, String password, String userName) {
+        veryNet = classVeryNet.isNetworkAvailable(this);
+
+        if (veryNet == false) {
+            Toast.makeText(ActivityRegister.this, "No se puede registrar el usuario porque no hay conexion a internet.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {

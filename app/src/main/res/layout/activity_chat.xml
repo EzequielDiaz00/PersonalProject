@@ -57,6 +57,7 @@
         app:layout_constraintTop_toBottomOf="@id/scrollView" />
 
     <LinearLayout
+        android:padding="8dp"
         android:id="@+id/messageLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -77,10 +78,11 @@
 
         <Button
             android:id="@+id/btnSendM"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_margin="5dp"
-            android:text="Send" />
+            android:background="@drawable/ic_miapp_send1"
+            app:iconPadding="0dp" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

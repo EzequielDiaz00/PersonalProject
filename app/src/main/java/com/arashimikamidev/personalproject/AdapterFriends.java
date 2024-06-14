@@ -1,8 +1,6 @@
 package com.arashimikamidev.personalproject;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,11 +8,17 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AdapterFriends extends ArrayAdapter<ClassFriends> {
+    private List<ClassFriends> originalFriendsList;
+    private List<ClassFriends> filteredFriendsList;
+
     public AdapterFriends(Context context, List<ClassFriends> friends) {
         super(context, 0, friends);
+        this.originalFriendsList = new ArrayList<>(friends);
+        this.filteredFriendsList = friends;
     }
 
     @Override
@@ -32,14 +36,30 @@ public class AdapterFriends extends ArrayAdapter<ClassFriends> {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        ClassFriends friends = getItem(position);
+        ClassFriends friend = getItem(position);
 
-        if (friends != null) {
-            viewHolder.tvNombre.setText(friends.getUserName());
-            viewHolder.tvEmail.setText(friends.getUserEmail());
+        if (friend != null) {
+            viewHolder.tvNombre.setText(friend.getUserName());
+            viewHolder.tvEmail.setText(friend.getUserEmail());
+            // Load the friend's image here if available
         }
 
         return convertView;
+    }
+
+    @Override
+    public int getCount() {
+        return filteredFriendsList.size();
+    }
+
+    @Override
+    public ClassFriends getItem(int position) {
+        return filteredFriendsList.get(position);
+    }
+
+    public void updateList(List<ClassFriends> newFriendsList) {
+        this.filteredFriendsList = newFriendsList;
+        notifyDataSetChanged();
     }
 
     private static class ViewHolder {

@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -21,12 +23,12 @@
         android:theme="@style/Theme.PersonalProject"
         tools:targetApi="23">
         <activity
+            android:name=".ActivityLogin"
+            android:exported="false" />
+        <activity
             android:name=".ActivityChat"
             android:exported="false"
             android:windowSoftInputMode="adjustPan" />
-        <activity
-            android:name=".ActivityAddFriend"
-            android:exported="false" />
         <activity
             android:name=".ActivityRegister"
             android:exported="false" />
@@ -34,7 +36,7 @@
             android:name=".ActivityMain"
             android:exported="false" />
         <activity
-            android:name=".ActivityLogin"
+            android:name=".ActivityIntro"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

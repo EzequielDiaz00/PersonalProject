@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -42,6 +43,7 @@ public class ActivityChat extends AppCompatActivity {
     EditText txtMsg;
     Button btnSend;
     RecyclerView rcChat;
+    ClassVeryNet classVeryNet;
     List<ClassChat> classChats;
     AdapterChat adapterChat;
     DatabaseReference mDatabaseRef;
@@ -50,6 +52,7 @@ public class ActivityChat extends AppCompatActivity {
     GoogleSignInOptions gso;
     GoogleSignInClient gsc;
     private String lblFriendEmail;
+    private static boolean veryNet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +60,9 @@ public class ActivityChat extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+
+        classVeryNet = new ClassVeryNet();
+        veryNet = classVeryNet.isNetworkAvailable(this);
 
         loadObjects();
         loadFriends();
@@ -94,6 +100,12 @@ public class ActivityChat extends AppCompatActivity {
     }
 
     private void loadFriends() {
+        veryNet = classVeryNet.isNetworkAvailable(this);
+
+        if (veryNet == false) {
+            Toast.makeText(ActivityChat.this, "No se pueden mostar los datos porque no hay conexion a internet", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         ClassFriends friends = (ClassFriends) getIntent().getSerializableExtra("friend");
 
@@ -127,6 +139,13 @@ public class ActivityChat extends AppCompatActivity {
     }
 
     private void sendMessage() {
+        veryNet = classVeryNet.isNetworkAvailable(this);
+
+        if (veryNet == false) {
+            Toast.makeText(ActivityChat.this, "No se puede enviar el mensaje porque no hay conexion a internet", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         ClassFriends friends = (ClassFriends) getIntent().getSerializableExtra("friend");
 
         FirebaseUser user = mAuth.getCurrentUser();
@@ -165,6 +184,13 @@ public class ActivityChat extends AppCompatActivity {
     }
 
     private void loadMessages() {
+        veryNet = classVeryNet.isNetworkAvailable(this);
+
+        if (veryNet == false) {
+            Toast.makeText(ActivityChat.this, "No se pueden mostar los datos porque no hay conexion a internet", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         FirebaseUser user = mAuth.getCurrentUser();
 
         if (user != null) {
