@@ -1,33 +1,33 @@
 package com.arashimikamidev.personalproject;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,16 +35,19 @@ import java.util.Objects;
 
 public class ActivityMain extends AppCompatActivity {
 
+    private static final int NOTIFICATION_PERMISSION_CODE = 1;
+
     private EditText txtSearch;
     private TextView lblNameUser;
     private ImageView imgUser, btnSettings;
     private ListView ltsUser;
     private ClassVeryNet classVeryNet;
+    private ClassNotification classNotification;
     private AdapterFriends adapterFriends;
     private FirebaseAuth mAuth;
     private FirebaseFirestore dbFirestore;
     private GoogleSignInClient googleSignInClient;
-    private static boolean veryNet;
+    private boolean veryNet;
     private List<ClassFriends> friendsList;
 
     @Override
@@ -52,8 +55,19 @@ public class ActivityMain extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        classNotification = new ClassNotification(this);
         classVeryNet = new ClassVeryNet();
         veryNet = classVeryNet.isNetworkAvailable(this);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_CODE);
+            } else {
+                classNotification.loadMessages(); // Iniciar la carga continua de mensajes
+            }
+        } else {
+            classNotification.loadMessages(); // Iniciar la carga continua de mensajes
+        }
 
         initializeUIComponents();
         loadUserDetails();
@@ -62,14 +76,12 @@ public class ActivityMain extends AppCompatActivity {
         btnSettings.setOnClickListener(v -> signOut());
 
         ltsUser.setOnItemClickListener((parent, view, position, id) -> {
-
             veryNet = classVeryNet.isNetworkAvailable(this);
 
             if (!veryNet) {
                 Toast.makeText(ActivityMain.this, "No se puede abrir el chat, porque no hay conexion a internet", Toast.LENGTH_SHORT).show();
                 return;
             }
-
             ClassFriends friend = adapterFriends.getItem(position);
             Intent intent = new Intent(getApplicationContext(), ActivityChat.class);
             intent.putExtra("friend", friend);
@@ -136,6 +148,9 @@ public class ActivityMain extends AppCompatActivity {
             lblNameUser.setText(user.getDisplayName());
             if (user.getPhotoUrl() != null) {
                 Glide.with(this).load(user.getPhotoUrl().toString()).into(imgUser);
+
+                String imgData = user.getPhotoUrl().toString();
+                Log.d("ActivityMain", "Data foto: " + imgData);
             }
         }
     }
@@ -156,13 +171,13 @@ public class ActivityMain extends AppCompatActivity {
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             String userName = document.getString("name");
                             String userEmail = document.getString("email");
-                            String userUid = document.getString("uid");
+                            String userPhoto = document.getString("photo");
 
                             FirebaseUser user = mAuth.getCurrentUser();
                             String email = user.getEmail();
 
                             if (!Objects.equals(email, userEmail)) {
-                                ClassFriends friend = new ClassFriends(userName, userEmail, null);
+                                ClassFriends friend = new ClassFriends(userName, userEmail, userPhoto);
                                 friendsList.add(friend);
                             }
                         }
@@ -183,5 +198,18 @@ public class ActivityMain extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == NOTIFICATION_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                classNotification.loadMessages();
+            } else {
+                // Permission denied
+                Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }

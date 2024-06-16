@@ -105,7 +105,7 @@ public class ActivityLogin extends AppCompatActivity {
     private void signInEmail(String email, String password) {
         veryNet = classVeryNet.isNetworkAvailable(this);
 
-        if (veryNet == false) {
+        if (!veryNet) {
             Toast.makeText(ActivityLogin.this, "No se puede iniciar sesion porque no hay conexion a internet.", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -133,7 +133,7 @@ public class ActivityLogin extends AppCompatActivity {
     private void signInWithGoogle() {
         veryNet = classVeryNet.isNetworkAvailable(this);
 
-        if (veryNet == false) {
+        if (!veryNet) {
             Toast.makeText(ActivityLogin.this, "No se puede iniciar sesion porque no hay conexion a internet.", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -174,12 +174,13 @@ public class ActivityLogin extends AppCompatActivity {
                 });
     }
 
-    private void insertDataToFirestore(String uid, String name, String email, String type) {
+    private void insertDataToFirestore(String uid, String name, String email, String type, String photo) {
         Map<String, Object> user = new HashMap<>();
         user.put("uid", uid);
         user.put("name", name);
         user.put("email", email);
         user.put("type", type);
+        user.put("photo", photo);
 
         dbFirestore.collection("users").document(uid)
                 .set(user)
@@ -196,7 +197,8 @@ public class ActivityLogin extends AppCompatActivity {
             String name = user.getDisplayName();
             String email = user.getEmail();
             String uid = user.getUid();
-            insertDataToFirestore(uid, name, email, "Google");
+            String photo = user.getPhotoUrl().toString();
+            insertDataToFirestore(uid, name, email, "Google", photo);
         }
     }
 

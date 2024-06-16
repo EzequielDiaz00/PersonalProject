@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -102,7 +103,7 @@ public class ActivityChat extends AppCompatActivity {
     private void loadFriends() {
         veryNet = classVeryNet.isNetworkAvailable(this);
 
-        if (veryNet == false) {
+        if (!veryNet) {
             Toast.makeText(ActivityChat.this, "No se pueden mostar los datos porque no hay conexion a internet", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -112,6 +113,7 @@ public class ActivityChat extends AppCompatActivity {
         if (friends != null) {
             lblFriendName.setText(friends.getUserName());
             lblFriendEmail = friends.getUserEmail();
+            Glide.with(this).load(friends.getUserFoto()).into(imgFriend);
         }
 
         dbFirestore.collection("users")
@@ -141,7 +143,7 @@ public class ActivityChat extends AppCompatActivity {
     private void sendMessage() {
         veryNet = classVeryNet.isNetworkAvailable(this);
 
-        if (veryNet == false) {
+        if (!veryNet) {
             Toast.makeText(ActivityChat.this, "No se puede enviar el mensaje porque no hay conexion a internet", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -154,14 +156,30 @@ public class ActivityChat extends AppCompatActivity {
             String keyMsg = mDatabaseRef.push().getKey();
 
             String uid = user.getUid();
+            String nameReceptor = friends.getUserName();
             String emailReceptor = friends.userEmail;
+            String nameEmisor = user.getDisplayName();
             String emailEmisor = user.getEmail();
+
+            ClassDate classDate = new ClassDate();
+            classDate.obtenerHora();
+            classDate.obtenerFecha();
+
+            String hora = classDate.horaAndroid;
+            String fecha = classDate.fechaAndroid;
+
+            Log.d("ActivityChat", "Date: " + hora);
+
             String txtMessage = txtMsg.getText().toString();
 
             HashMap<String, Object> mensajeMap = new HashMap<>();
+            mensajeMap.put("nEmisor", nameEmisor);
             mensajeMap.put("emisor", emailEmisor);
+            mensajeMap.put("nReceptor", nameReceptor);
             mensajeMap.put("receptor", emailReceptor);
             mensajeMap.put("msg", txtMessage);
+            mensajeMap.put("hora", hora);
+            mensajeMap.put("fecha", fecha);
 
             if (keyMsg != null) {
                 mDatabaseRef.child("chats").child(keyMsg).setValue(mensajeMap)
@@ -186,7 +204,7 @@ public class ActivityChat extends AppCompatActivity {
     private void loadMessages() {
         veryNet = classVeryNet.isNetworkAvailable(this);
 
-        if (veryNet == false) {
+        if (!veryNet) {
             Toast.makeText(ActivityChat.this, "No se pueden mostar los datos porque no hay conexion a internet", Toast.LENGTH_SHORT).show();
             return;
         }

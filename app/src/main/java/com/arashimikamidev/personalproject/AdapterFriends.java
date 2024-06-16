@@ -8,6 +8,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +43,7 @@ public class AdapterFriends extends ArrayAdapter<ClassFriends> {
         if (friend != null) {
             viewHolder.tvNombre.setText(friend.getUserName());
             viewHolder.tvEmail.setText(friend.getUserEmail());
-            // Load the friend's image here if available
+            Glide.with(getContext()).load(friend.getUserFoto()).into(viewHolder.imgFriend);
         }
 
         return convertView;
