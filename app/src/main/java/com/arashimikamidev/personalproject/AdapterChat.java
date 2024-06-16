@@ -37,11 +37,13 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.ViewHolder> {
             holder.linear2.setGravity(Gravity.RIGHT);
             holder.linear1.setVisibility(View.GONE);
             holder.tvEmisor.setText(chat.getmEmisor());
+            holder.tvDateE.setText(chat.getMfEmisor());
         } else if (chat.getmReceptor() != null) {
             holder.linear2.setGravity(Gravity.LEFT);
             holder.linear1.setVisibility(View.VISIBLE);
             holder.linear2.setVisibility(View.GONE);
             holder.tvReceptor.setText(chat.getmReceptor());
+            holder.tvDateR.setText(chat.getMfReceptor());
         }
     }
 
@@ -51,13 +53,15 @@ public class AdapterChat extends RecyclerView.Adapter<AdapterChat.ViewHolder> {
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvReceptor, tvEmisor;
+        TextView tvReceptor, tvEmisor, tvDateR, tvDateE;
         LinearLayout linear1, linear2;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvReceptor = itemView.findViewById(R.id.boxRecM);
             tvEmisor = itemView.findViewById(R.id.boxEmiM);
+            tvDateR = itemView.findViewById(R.id.boxRecD);
+            tvDateE = itemView.findViewById(R.id.boxEmiD);
             linear1 = itemView.findViewById(R.id.boxAllR);
             linear2 = itemView.findViewById(R.id.boxAllE);
         }

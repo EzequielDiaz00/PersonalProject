@@ -230,13 +230,15 @@ public class ActivityChat extends AppCompatActivity {
                                 String emisor = messageSnapshot.child("emisor").getValue(String.class);
                                 String receptor = messageSnapshot.child("receptor").getValue(String.class);
                                 String msg = messageSnapshot.child("msg").getValue(String.class);
+                                String fecha = messageSnapshot.child("fecha").getValue(String.class);
+                                String hora = messageSnapshot.child("hora").getValue(String.class);
 
                                 // Verificar si alguno de los valores es nulo antes de proceder
                                 if (emisor != null && receptor != null && msg != null) {
                                     if (Objects.equals(user.getEmail(), emisor) && Objects.equals(lblFriendEmail, receptor)) {
-                                        classChats.add(new ClassChat(null, msg));
+                                        classChats.add(new ClassChat(null, msg, null, fecha + " - " + hora));
                                     } else if (Objects.equals(user.getEmail(), receptor) && Objects.equals(lblFriendEmail, emisor)) {
-                                        classChats.add(new ClassChat(msg, null));
+                                        classChats.add(new ClassChat(msg, null, fecha + " - " + hora, null));
                                     }
                                 } else {
                                     Log.e("firebase", "Message data is incomplete: " + messageSnapshot.getKey());
