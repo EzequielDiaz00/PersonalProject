@@ -1,6 +1,5 @@
 package com.arashimikamidev.personalproject;
 
-import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -8,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
@@ -22,7 +20,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.List;
 import java.util.Objects;
 
 public class ClassNotification {
@@ -106,9 +103,7 @@ public class ClassNotification {
     }
 
     public void showNotificationMessage(String user, String email, String msg) {
-        ClassFriends friend = new ClassFriends(user, email, null);
         Intent intent = new Intent(context, ActivityMain.class);
-        intent.putExtra("friend", friend);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 

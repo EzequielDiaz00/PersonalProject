@@ -1,20 +1,31 @@
 package com.arashimikamidev.personalproject;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,7 +34,11 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +50,8 @@ public class ActivityLogin extends AppCompatActivity {
     private DatabaseReference mDatabaseRef;
     private FirebaseAuth mAuth;
     private FirebaseFirestore dbFirestore;
+    private FirebaseStorage storage;
+    private StorageReference storageRef;
     private GoogleSignInOptions gso;
     private GoogleSignInClient gsc;
 
@@ -59,8 +76,8 @@ public class ActivityLogin extends AppCompatActivity {
         classVeryNet = new ClassVeryNet();
         veryNet = classVeryNet.isNetworkAvailable(this);
 
-        if (veryNet == false) {
-            Toast.makeText(ActivityLogin.this, "No hay conexion a internet. Conectese a una red", Toast.LENGTH_SHORT).show();
+        if (!veryNet) {
+            Toast.makeText(ActivityLogin.this, "No hay conexión a internet. Conéctese a una red", Toast.LENGTH_SHORT).show();
         }
 
         loadObjects();
@@ -106,7 +123,7 @@ public class ActivityLogin extends AppCompatActivity {
         veryNet = classVeryNet.isNetworkAvailable(this);
 
         if (!veryNet) {
-            Toast.makeText(ActivityLogin.this, "No se puede iniciar sesion porque no hay conexion a internet.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ActivityLogin.this, "No se puede iniciar sesión porque no hay conexión a internet.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -134,7 +151,7 @@ public class ActivityLogin extends AppCompatActivity {
         veryNet = classVeryNet.isNetworkAvailable(this);
 
         if (!veryNet) {
-            Toast.makeText(ActivityLogin.this, "No se puede iniciar sesion porque no hay conexion a internet.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ActivityLogin.this, "No se puede iniciar sesión porque no hay conexión a internet.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -191,14 +208,98 @@ public class ActivityLogin extends AppCompatActivity {
                 .addOnFailureListener(e -> Log.w("ActivityLogin", "Error writing document", e));
     }
 
+    private void updateDataToFirestore(String uid, String photo) {
+        Map<String, Object> user = new HashMap<>();
+        user.put("uid", uid);
+        user.put("urlPhoto", photo);
+
+        dbFirestore.collection("users").document(uid)
+                .update(user)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("ActivityLogin", "DocumentSnapshot successfully updated!");
+                })
+                .addOnFailureListener(e -> Log.w("ActivityLogin", "Error updating document", e));
+    }
+
+    private void insertDataToStorage(String uid, String photoUrl) {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference();
+
+        Glide.with(this)
+                .asBitmap()
+                .load(photoUrl)
+                .into(new CustomTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        // Convert bitmap to byte array
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        resource.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                        byte[] data = baos.toByteArray();
+
+                        // Storage reference for the user's photo
+                        StorageReference userRef = storageRef.child(uid);
+                        StorageReference userFotosRef = userRef.child("fotosUser/photo.jpg");
+
+                        // Upload byte array to Firebase Storage
+                        UploadTask uploadTask = userFotosRef.putBytes(data);
+
+                        uploadTask.addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception exception) {
+                                Log.d("ActivityRegister", "Error uploading data to FireStorage: " + exception.getMessage());
+                            }
+                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                // Handle successful upload
+                                Log.d("ActivityRegister", "Upload successful");
+                            }
+                        });
+
+                        uploadTask = userFotosRef.putBytes(data);
+
+                        Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                            @Override
+                            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                                if (!task.isSuccessful()) {
+                                    throw task.getException();
+                                }
+                                return userFotosRef.getDownloadUrl();
+                            }
+                        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Uri> task) {
+                                try {
+                                    if (task.isSuccessful()) {
+                                        Uri downloadUri = task.getResult();
+
+                                        updateDataToFirestore(uid, downloadUri.toString());
+                                    }
+                                } catch (Exception ex) {
+                                    Log.d("ActivityRegister_insertDataToStorage", "Error al extraer URL de Storage: " + ex.getMessage());
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                        // Remove any references to the target when it's no longer valid
+                    }
+                });
+    }
+
     private void loadUser() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
             String name = user.getDisplayName();
             String email = user.getEmail();
             String uid = user.getUid();
-            String photo = user.getPhotoUrl().toString();
+            String photo = user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : null;
             insertDataToFirestore(uid, name, email, "Google", photo);
+            if (photo != null) {
+                insertDataToStorage(uid, photo);
+            }
         }
     }
 

@@ -31,6 +31,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,6 +52,8 @@ public class ActivityChat extends AppCompatActivity {
     DatabaseReference mDatabaseRef;
     FirebaseAuth mAuth;
     FirebaseFirestore dbFirestore;
+    FirebaseStorage storage;
+    StorageReference storageRef;
     GoogleSignInOptions gso;
     GoogleSignInClient gsc;
     private String lblFriendEmail;
@@ -88,6 +92,8 @@ public class ActivityChat extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         dbFirestore = FirebaseFirestore.getInstance();
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference();
 
         classChats = new ArrayList<>();
         adapterChat = new AdapterChat(this, classChats);
