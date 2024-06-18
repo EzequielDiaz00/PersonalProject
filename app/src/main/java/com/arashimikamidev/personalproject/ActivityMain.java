@@ -192,7 +192,7 @@ public class ActivityMain extends AppCompatActivity {
                             String email = user.getEmail();
 
                             if (!Objects.equals(email, userEmail)) {
-                                ClassFriends friend = new ClassFriends(userName, userEmail, userPhoto, userUrlPhoto);
+                                ClassFriends friend = new ClassFriends(userName, userEmail, userUrlPhoto, userPhoto);
                                 friendsList.add(friend);
                             }
                         }

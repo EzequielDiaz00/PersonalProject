@@ -15,12 +15,21 @@
         android:text="Registrar Usuario"
         android:textSize="30dp" />
 
+    <ImageView
+        android:id="@+id/imgUser"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_below="@id/lblRegister"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/ic_miapp_add_photo1"
+        android:scaleType="centerCrop" />
+
     <EditText
         android:id="@+id/txtName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/lblRegister"
-        android:layout_margin="15dp"
+        android:layout_below="@+id/imgUser"
+        android:layout_margin="10dp"
         android:hint="Usuario"
         android:inputType="textPersonName"
         android:textSize="20dp" />
@@ -30,7 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/txtName"
-        android:layout_margin="15dp"
+        android:layout_margin="10dp"
         android:hint="Correo"
         android:inputType="textEmailAddress"
         android:textSize="20dp" />
@@ -40,7 +49,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/txtEmail"
-        android:layout_margin="15dp"
+        android:layout_margin="10dp"
         android:hint="Contraseña"
         android:inputType="textPassword"
         android:textSize="20dp" />
@@ -50,7 +59,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/txtPassword"
-        android:layout_margin="15dp"
+        android:layout_margin="10dp"
         android:hint="Confirme contraseña"
         android:inputType="textPassword"
         android:textSize="20dp" />
@@ -61,9 +70,20 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/txtConfirm"
         android:layout_centerHorizontal="true"
-        android:layout_margin="15dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
         android:text="Registrarme"
         android:textSize="20dp" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_below="@id/btnRegister"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/lblQuestion"
@@ -84,7 +104,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/lblQuestion"
         android:layout_centerHorizontal="true"
-        android:layout_margin="15dp"
+        android:layout_margin="10dp"
         android:text="Iniciar sesion"
         android:textSize="20dp" />
 

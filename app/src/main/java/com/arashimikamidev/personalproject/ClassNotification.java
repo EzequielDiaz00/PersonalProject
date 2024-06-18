@@ -82,12 +82,18 @@ public class ClassNotification {
                             if (lastMessageSnapshot != null) {
                                 String lastMsg = lastMessageSnapshot.child("msg").getValue(String.class);
                                 String lastEmi = lastMessageSnapshot.child("emisor").getValue(String.class);
+                                String lastRec = lastMessageSnapshot.child("receptor").getValue(String.class);
                                 Log.d("firebase", "Último emisor: " + lastEmi);
+                                Log.d("firebase", "Último receptor: " + lastRec);
                                 Log.d("firebase", "Último mensaje: " + lastMsg);
 
                                 if (!Objects.equals(lastEmi, user.getEmail())) {
-                                    Log.d("firebase", "Último emisor email: " + user.getEmail());
-                                    showNotificationMessage(nameEmisor, emisor, msg);
+                                    if (Objects.equals(lastRec, user.getEmail())) {
+                                        if (!Objects.equals(lastEmi, user.getEmail())) {
+                                            Log.d("firebase", "Último emisor email: " + user.getEmail());
+                                            showNotificationMessage(nameEmisor, emisor, msg);
+                                        }
+                                    }
                                 }
                             }
                         }

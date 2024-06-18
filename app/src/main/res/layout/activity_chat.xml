@@ -32,7 +32,8 @@
                     android:id="@+id/imgFriend"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
-                    android:background="@drawable/ic_miapp_user1" />
+                    android:background="@drawable/ic_miapp_user1"
+                    android:scaleType="centerCrop" />
 
                 <TextView
                     android:id="@+id/lblNameFriend"
@@ -57,12 +58,12 @@
         app:layout_constraintTop_toBottomOf="@id/scrollView" />
 
     <LinearLayout
-        android:padding="8dp"
         android:id="@+id/messageLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
+        android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">

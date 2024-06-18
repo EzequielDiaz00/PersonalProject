@@ -10,8 +10,10 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -46,6 +48,7 @@ public class ActivityLogin extends AppCompatActivity {
 
     private EditText txtEmail, txtPassword;
     private Button btnLogin, btnRegister, btnGoogle;
+    private ProgressBar progressBar;
     private ClassVeryNet classVeryNet;
     private DatabaseReference mDatabaseRef;
     private FirebaseAuth mAuth;
@@ -114,6 +117,8 @@ public class ActivityLogin extends AppCompatActivity {
         btnGoogle = findViewById(R.id.btnGoogle);
         btnLogin = findViewById(R.id.btnLogin);
         btnRegister = findViewById(R.id.btnRegister);
+        progressBar = findViewById(R.id.progressBar);
+
         mAuth = FirebaseAuth.getInstance();
         dbFirestore = FirebaseFirestore.getInstance();
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
@@ -127,6 +132,8 @@ public class ActivityLogin extends AppCompatActivity {
             return;
         }
 
+        progressBar.setVisibility(View.VISIBLE);
+
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
@@ -135,6 +142,7 @@ public class ActivityLogin extends AppCompatActivity {
                     } else {
                         Log.w("ActivityLogin", "signInWithEmail:failure", task.getException());
                         Toast.makeText(ActivityLogin.this, "El usuario no existe", Toast.LENGTH_SHORT).show();
+                        progressBar.setVisibility(View.GONE);
                     }
                 });
     }
@@ -237,6 +245,7 @@ public class ActivityLogin extends AppCompatActivity {
                         byte[] data = baos.toByteArray();
 
                         // Storage reference for the user's photo
+
                         StorageReference userRef = storageRef.child(uid);
                         StorageReference userFotosRef = userRef.child("fotosUser/photo.jpg");
 
