@@ -10,11 +10,14 @@ public class ClassChat implements Serializable {
     String mfReceptor;
     String mfEmisor;
 
-    public ClassChat(String mReceptor, String mEmisor, String mfReceptor, String mfEmisor) {
+    String mFoto;
+
+    public ClassChat(String mReceptor, String mEmisor, String mfReceptor, String mfEmisor, String mFoto) {
         this.mReceptor = mReceptor;
         this.mEmisor = mEmisor;
         this.mfReceptor = mfReceptor;
         this.mfEmisor = mfEmisor;
+        this.mFoto = mFoto;
     }
 
     public String getmEmisor() {
@@ -31,5 +34,9 @@ public class ClassChat implements Serializable {
 
     public String getMfReceptor() {
         return mfReceptor;
+    }
+
+    public String getmFoto() {
+        return mFoto;
     }
 }

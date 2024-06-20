@@ -28,18 +28,26 @@
             android:textColor="#FF5722"
             android:textSize="20sp" />
 
+        <ImageView
+            android:id="@+id/imgEmi"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:scaleType="fitCenter"
+            android:visibility="gone" />
+
         <TextView
             android:id="@+id/boxEmiD"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:layout_margin="2dp"
-            android:layout_marginStart="2dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginEnd="2dp"
-            android:layout_marginBottom="2dp"
+            android:layout_margin="1dp"
+            android:layout_marginStart="1dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginEnd="1dp"
+            android:layout_marginBottom="1dp"
             android:gravity="end"
             android:textColor="#FF5722"
             android:textSize="10sp" />
+
     </LinearLayout>
 
     <LinearLayout
@@ -68,18 +76,26 @@
             android:textColor="#00BCD4"
             android:textSize="20sp" />
 
+        <ImageView
+            android:id="@+id/imgRec"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:scaleType="fitCenter"
+            android:visibility="gone" />
+
         <TextView
             android:id="@+id/boxRecD"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:layout_margin="2dp"
-            android:layout_marginStart="2dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginEnd="2dp"
-            android:layout_marginBottom="2dp"
+            android:layout_margin="1dp"
+            android:layout_marginStart="1dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginEnd="1dp"
+            android:layout_marginBottom="1dp"
             android:gravity="start"
             android:textColor="#00BCD4"
             android:textSize="10sp" />
+
     </LinearLayout>
 
 </RelativeLayout>

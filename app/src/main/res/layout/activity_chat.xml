@@ -57,6 +57,25 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/scrollView" />
 
+    <!--<LinearLayout
+        android:id="@+id/btnPhotos"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:padding="8dp"
+        app:layout_constraintBottom_toTopOf="@id/messageLayout"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <Button
+            android:id="@+id/btnGalery"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_margin="1dp"
+            android:background="@drawable/ic_miapp_galery1"
+            app:iconPadding="0dp" />
+    </LinearLayout>-->
+
     <LinearLayout
         android:id="@+id/messageLayout"
         android:layout_width="0dp"
@@ -75,15 +94,24 @@
             android:layout_margin="5dp"
             android:layout_weight="1"
             android:hint="Escribe un mensaje..."
-            android:textSize="20dp" />
+            android:textSize="18dp" />
+
+        <Button
+            android:id="@+id/btnCapture"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_margin="1dp"
+            android:background="@drawable/ic_miapp_galery1"
+            app:iconPadding="0dp" />
 
         <Button
             android:id="@+id/btnSendM"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_margin="5dp"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_margin="1dp"
             android:background="@drawable/ic_miapp_send1"
             app:iconPadding="0dp" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
